@@ -9,6 +9,7 @@ from rules.engine import check_rules
 from ids.detection import IDSEngine
 from core.decision import DecisionEngine
 from rules.engine import add_block_rule
+from core.logger import EventLogger
 
 # --- ANSI COLORS FOR VISUALIZATION ---
 RED = "\033[91m"
@@ -41,6 +42,7 @@ def start_processing():
 
 	ids = IDSEngine()
 	brain = DecisionEngine() # Brain
+	logger = EventLogger()
 	try:
 		while not shutdown_event.is_set():
 			if not packet_buffer.empty():
@@ -77,6 +79,9 @@ def start_processing():
 							color = YELLOW
 						
 						print(f"{color}[{event['final_action']}]{RESET} {event['reason']} | {event['proto']} | {event['src_ip']} -> {event['dst_ip']}")
+
+						# Stage 6 Logging
+						logger.log_event(event)
 						
 						if event['final_action'] == "BLOCK_IP":
 							if add_block_rule(event['src_ip']):

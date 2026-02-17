@@ -1,13 +1,11 @@
 {
     "blocked_ips": [
-        "192.168.222.129",
-        "172.21.4.126"
+        "10.49.51.16",
+        "10.49.51.173"
     ],
     "blocked_ports": [
         23,
         4444
     ],
-    "blocked_protocols": [
-        
-    ]
+    "blocked_protocols": []
 }
