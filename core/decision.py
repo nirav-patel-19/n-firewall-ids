@@ -1,4 +1,5 @@
 import time
+import netifaces
 
 class DecisionEngine:
 	def __init__(self):
@@ -6,6 +7,25 @@ class DecisionEngine:
 		# { 'ip': {'count': 0, 'last_action': 'ALLOW'} }
 		self.ip_history = {}
 		self.ESCALATION_THRESHOLD = 3
+		self.local_ip = self.get_local_ip()
+
+		print(f"[DecisionEngine] Monitoring Host IP detected as: {self.local_ip}")
+
+	def get_local_ip(self):
+		"""Detects the real IP address from the active network interface.
+		   Avoids default ip problems.
+		"""
+		for iface in netifaces.interfaces():
+			if iface == "lo":
+				continue
+
+			addrs = netifaces.ifaddresses(iface)
+			if netifaces.AF_INET in addrs:
+				for addr in addrs[netifaces.AF_INET]:
+					ip = addr.get('addr')
+					if ip and not ip.startswith("127."):
+						return ip
+		return None
 
 	def decide(self, packet_data, firewall_allowed, ids_alert):
 		"""
@@ -17,6 +37,19 @@ class DecisionEngine:
 		severity = "INFO"
 		reason = "Normal Traffic"
 
+		if src_ip == self.local_ip:
+			return {
+				"timestamp": time.time(),
+				"src_ip": src_ip,
+				"dst_ip": packet_data['dst_ip'],
+				"proto": packet_data['proto'],
+				"fw_decision": "ALLOW",
+				"ids_alert": None,
+				"final_action": "ALLOW",
+				"severity": "INFO",
+				"reason": "Local System Traffic"
+			}
+                
 		# 1. Initialize hitory for new IP
 		if src_ip not in self.ip_history:
 			self.ip_history[src_ip] = {'alert_count': 0}

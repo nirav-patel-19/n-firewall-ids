@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firewall IDS Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<h1>🔐 Firewall IDS Dashboard</h1>
+
+<div class="cards">
+    <div class="card">
+        <h2>Traffic Events</h2>
+        <table id="events">
+            <thead>
+                <tr>
+                    <th>Time</th><th>Source</th><th>Dest</th>
+                    <th>Proto</th><th>Action</th><th>Severity</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Attack Summary</h2>
+        <ul id="stats"></ul>
+    </div>
+
+    <div class="card">
+        <h2>Blocked IPs</h2>
+        <ul id="blocked"></ul>
+    </div>
+</div>
+
+<script>
+async function loadEvents(){
+    let res = await fetch('/api/events');
+    let data = await res.json();
+
+    let tbody = document.querySelector("#events tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(e=>{
+        tbody.innerHTML += `
+        <tr>
+            <td>${e.readable_time}</td>
+            <td>${e.src_ip}</td>
+            <td>${e.dst_ip}</td>
+            <td>${e.proto}</td>
+            <td>${e.final_action}</td>
+            <td>${e.severity}</td>
+        </tr>`;
+    });
+}
+
+async function loadStats(){
+    let res = await fetch('/api/stats');
+    let data = await res.json();
+
+    let list = document.getElementById("stats");
+    list.innerHTML = "";
+    data.forEach(s=>{
+        list.innerHTML += `<li>${s.final_action}: ${s.count}</li>`;
+    });
+}
+
+async function loadBlocked(){
+    let res = await fetch('/api/blocked');
+    let data = await res.json();
+
+    let list = document.getElementById("blocked");
+    list.innerHTML = "";
+    data.forEach(b=>{
+        list.innerHTML += `<li>${b.src_ip} (${b.hits})</li>`;
+    });
+}
+
+setInterval(()=>{
+    loadEvents();
+    loadStats();
+    loadBlocked();
+}, 2000);
+</script>
+
+</body>
+</html>

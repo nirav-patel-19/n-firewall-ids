@@ -1,0 +1,16 @@
+body { font-family: Arial; background:#111; color:#eee; }
+h1 { text-align:center; }
+
+.cards { display:flex; gap:20px; padding:20px; }
+
+.card {
+    background:#1e1e1e;
+    padding:15px;
+    border-radius:8px;
+    width:33%;
+}
+
+table { width:100%; border-collapse: collapse; }
+th,td { border-bottom:1px solid #444; padding:6px; }
+tr:hover { background:#333; }
+
