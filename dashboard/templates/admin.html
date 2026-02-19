@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Firewall Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="color: var(--accent-red);">Admin Control Panel</h1>
+            <div>
+                <a href="/" style="color: white; margin-right: 20px; text-decoration: none;">&larr; Back to Dashboard</a>
+                <a href="/logout" class="btn btn-red">Logout</a>
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1fr 2fr;">
+            <div class="card" style="height: fit-content;">
+                <h2 style="color: white; text-align: left;">Manage IP Rules</h2>
+                <div class="form-group">
+                    <input type="text" id="ipInput" class="form-control" placeholder="Enter IP (e.g., 192.168.1.50)">
+                </div>
+                <button onclick="modifyRule('add')" class="btn btn-red" style="width: 100%;">Block IP</button>
+                <p id="ruleMsg" style="margin-top: 15px; display: none;"></p>
+            </div>
+
+            <div class="table-container">
+                <table style="border: none;">
+                    <thead>
+                        <tr>
+                            <th>Blocked Source IP</th>
+                            <th>Total Blocked Hits</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blockedIpsBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+  async function loadBlocked() {
+      try {
+          const res = await fetch('/api/blocked_ips', { cache: "no-store" });
+          const data = await res.json();
+
+          const tbody = document.getElementById('blockedIpsBody');
+          tbody.innerHTML = '';
+
+          if (!data.length) {
+              tbody.innerHTML = `
+                  <tr>
+                      <td colspan="3" style="text-align:center; color:var(--text-muted)">
+                          No blocked IPs
+                      </td>
+                  </tr>`;
+              return;
+          }
+
+          data.forEach(row => {
+              tbody.innerHTML += `
+                  <tr>
+                      <td class="text-red" style="font-family: monospace;">${row.src_ip}</td>
+                      <td>${row.hits}</td>
+                      <td>
+                          <button onclick="modifyRule('remove','${row.src_ip}')"
+                              class="btn"
+                              style="background-color: var(--bg-card-hover); padding:5px 10px; font-size:0.8rem;">
+                              Remove Rule
+                          </button>
+                      </td>
+                  </tr>`;
+          });
+
+      } catch (err) {
+          console.error("Failed loading blocked IPs:", err);
+      }
+  }
+
+  async function modifyRule(action, targetIp = null) {
+      const ip = targetIp || document.getElementById('ipInput').value.trim();
+      if (!ip) return;
+
+      try {
+          const res = await fetch('/api/block_ip', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ ip: ip, action: action })
+          });
+
+          const result = await res.json();
+
+          const msg = document.getElementById('ruleMsg');
+          msg.style.display = "block";
+
+          if (result.success) {
+              msg.innerText = action === "add"
+                  ? `Blocked ${ip}`
+                  : `Removed ${ip}`;
+              msg.style.color = "var(--accent-green)";
+          } else {
+              msg.innerText = "Operation failed";
+              msg.style.color = "var(--accent-red)";
+          }
+
+          document.getElementById('ipInput').value = '';
+
+          // 🔥 Force refresh immediately
+          await loadBlocked();
+
+      } catch (err) {
+          console.error("Rule update failed:", err);
+      }
+  }
+
+  /* Initial load */
+  loadBlocked();
+
+  /*Keep UI synced with firewall state */
+  setInterval(loadBlocked, 2000);
+  </script>
+
+</body>
+</html>

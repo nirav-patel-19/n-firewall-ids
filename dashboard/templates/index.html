@@ -1,86 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Firewall IDS Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css">
+<meta charset="UTF-8">
+<title>Firewall SOC</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-<h1>🔐 Firewall IDS Dashboard</h1>
+<div class="container">
 
-<div class="cards">
-    <div class="card">
-        <h2>Traffic Events</h2>
-        <table id="events">
-            <thead>
-                <tr>
-                    <th>Time</th><th>Source</th><th>Dest</th>
-                    <th>Proto</th><th>Action</th><th>Severity</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+<div class="header">
+    <h1>Firewall Security Operations Center</h1>
+    <a href="/admin" class="btn btn-blue">Admin</a>
+</div>
+
+<div class="stats">
+    <div class="stat">
+        <h3>Total Events</h3>
+        <p id="total">0</p>
     </div>
-
-    <div class="card">
-        <h2>Attack Summary</h2>
-        <ul id="stats"></ul>
+    <div class="stat">
+        <h3>Blocked</h3>
+        <p id="blocked" class="text-red">0</p>
     </div>
-
-    <div class="card">
-        <h2>Blocked IPs</h2>
-        <ul id="blocked"></ul>
+    <div class="stat">
+        <h3>Allowed</h3>
+        <p id="allowed" class="text-green">0</p>
     </div>
 </div>
 
-<script>
-async function loadEvents(){
-    let res = await fetch('/api/events');
-    let data = await res.json();
+<div class="grid">
+    <div class="card">
+        <canvas id="protoChart"></canvas>
+    </div>
+    <div class="card">
+        <canvas id="actionChart"></canvas>
+    </div>
+</div>
 
-    let tbody = document.querySelector("#events tbody");
-    tbody.innerHTML = "";
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Time</th><th>Source</th><th>Destination</th>
+<th>Protocol</th><th>Action</th><th>Severity</th>
+</tr>
+</thead>
+<tbody id="events"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+let protoChart, actionChart;
+
+async function refresh() {
+    const stats = await fetch('/api/stats').then(r=>r.json());
+    const events = await fetch('/api/events').then(r=>r.json());
+
+    document.getElementById('total').innerText = events.length;
+
+    let blocked = events.filter(e=>e.final_action.includes("BLOCK")).length;
+    document.getElementById('blocked').innerText = blocked;
+    document.getElementById('allowed').innerText = events.length - blocked;
+
+    renderCharts(stats);
+    renderTable(events);
+}
+
+function renderCharts(data) {
+
+    if (!protoChart) {
+        protoChart = new Chart(protoChartCtx = document.getElementById('protoChart'), {
+            type:'doughnut',
+            data:{labels:Object.keys(data.protocols),
+            datasets:[{data:Object.values(data.protocols)}]}
+        });
+    } else {
+        protoChart.data.labels = Object.keys(data.protocols);
+        protoChart.data.datasets[0].data = Object.values(data.protocols);
+        protoChart.update();
+    }
+
+    if (!actionChart) {
+        actionChart = new Chart(document.getElementById('actionChart'), {
+            type:'bar',
+            data:{labels:Object.keys(data.actions),
+            datasets:[{data:Object.values(data.actions)}]}
+        });
+    } else {
+        actionChart.data.labels = Object.keys(data.actions);
+        actionChart.data.datasets[0].data = Object.values(data.actions);
+        actionChart.update();
+    }
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('events');
+    tbody.innerHTML = '';
 
     data.forEach(e=>{
         tbody.innerHTML += `
         <tr>
-            <td>${e.readable_time}</td>
-            <td>${e.src_ip}</td>
-            <td>${e.dst_ip}</td>
-            <td>${e.proto}</td>
-            <td>${e.final_action}</td>
-            <td>${e.severity}</td>
+        <td>${e.readable_time}</td>
+        <td>${e.src_ip}</td>
+        <td>${e.dst_ip}</td>
+        <td>${e.proto}</td>
+        <td class="${e.final_action.includes('BLOCK')?'text-red':'text-green'}">
+            ${e.final_action}
+        </td>
+        <td>${e.severity}</td>
         </tr>`;
     });
 }
 
-async function loadStats(){
-    let res = await fetch('/api/stats');
-    let data = await res.json();
-
-    let list = document.getElementById("stats");
-    list.innerHTML = "";
-    data.forEach(s=>{
-        list.innerHTML += `<li>${s.final_action}: ${s.count}</li>`;
-    });
-}
-
-async function loadBlocked(){
-    let res = await fetch('/api/blocked');
-    let data = await res.json();
-
-    let list = document.getElementById("blocked");
-    list.innerHTML = "";
-    data.forEach(b=>{
-        list.innerHTML += `<li>${b.src_ip} (${b.hits})</li>`;
-    });
-}
-
-setInterval(()=>{
-    loadEvents();
-    loadStats();
-    loadBlocked();
-}, 2000);
+setInterval(refresh,2000);
+refresh();
 </script>
-
 </body>
 </html>
+
