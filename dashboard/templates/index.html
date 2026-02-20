@@ -39,6 +39,11 @@
     </div>
 </div>
 
+<div class="card" style="margin-bottom:20px;">
+    <h3 style="margin-bottom:10px;">System Performance Monitor</h3>
+    <canvas id="healthChart"></canvas>
+</div>
+
 <div class="table-container">
 <table>
 <thead>
@@ -54,7 +59,7 @@
 </div>
 
 <script>
-let protoChart, actionChart;
+let protoChart, actionChart, healthChart;
 
 async function refresh() {
     const stats = await fetch('/api/stats').then(r=>r.json());
@@ -116,8 +121,46 @@ function renderTable(data) {
     });
 }
 
-setInterval(refresh,2000);
+async function loadMetrics() {
+    const res = await fetch('/api/metrics');
+    const data = await res.json();
+
+    const labels = data.map(x => x.timestamp);
+    const cpu = data.map(x => x.cpu);
+    const memory = data.map(x => x.memory);
+    const rate = data.map(x => x.packet_rate);
+
+    if (!healthChart) {
+        healthChart = new Chart(document.getElementById('healthChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: "CPU %", data: cpu, borderWidth: 2, fill:false },
+                    { label: "Memory %", data: memory, borderWidth: 2, fill:false },
+                    { label: "Packet Rate", data: rate, borderWidth: 2, fill:false }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    } else {
+        healthChart.data.labels = labels;
+        healthChart.data.datasets[0].data = cpu;
+        healthChart.data.datasets[1].data = memory;
+        healthChart.data.datasets[2].data = rate;
+        healthChart.update();
+    }
+}
+
+setInterval(() => {
+    refresh();
+    loadMetrics();
+}, 2000);
 refresh();
+loadMetrics();
 </script>
 </body>
 </html>

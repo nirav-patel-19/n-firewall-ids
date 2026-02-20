@@ -147,6 +147,20 @@ def block_ip():
 
     return jsonify({"success": result})
 
+@app.route("/api/metrics")
+def get_metrics():
+    db = os.path.join(PROJECT_ROOT, "storage", "metrics.db")
+
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("""
+        SELECT * FROM system_metrics
+        ORDER BY id DESC
+        LIMIT 30
+    """).fetchall()
+    conn.close()
+
+    return jsonify([dict(r) for r in rows][::-1])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

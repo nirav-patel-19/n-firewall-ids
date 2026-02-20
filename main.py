@@ -1,6 +1,7 @@
 import threading
 import signal
 import sys
+import time
 from queue import Empty
 from capture.sniffer_v2 import packet_buffer, start_ingestion
 from capture.parser import parse_packet
@@ -10,6 +11,7 @@ from ids.detection import IDSEngine
 from core.decision import DecisionEngine
 from rules.engine import add_block_rule
 from core.logger import EventLogger
+from core.monitor import PerformanceMonitor
 
 # --- ANSI COLORS FOR VISUALIZATION ---
 RED = "\033[91m"
@@ -23,7 +25,7 @@ def shutdown_handler(sig, frame):
 	"""
 	Catches Ctrl+C. This is vital so the background sniffer thread doesn't beacome a 'Zombie' process.
 	"""
-
+	
 	print("\n[!] Graceful Shutdown Initialized...")
 	print(f"[*] Packets remaining in buffer: {packet_buffer.qsize()}")
 	print("[*] Closing Firewall. Goodbye!")
@@ -96,12 +98,27 @@ def start_processing():
 	except Exception as e:
 		print(f"[!] Processing Error: {e}")
 
+# --- STAGE 9: PERFORMANCE MONITOR THREAD ---
+def start_monitoring():
+    """
+    Runs independently of detection pipeline.
+    Collects CPU, memory, and packet rate without affecting IDS timing.
+    """
+    monitor = PerformanceMonitor()
+    print("[*] Stage 9: Performance Monitor started...")
 
+    while not shutdown_event.is_set():
+        monitor.collect()
+        time.sleep(2)   # sample interval (important for evaluation)
 
 if __name__ == "__main__":
 	# Start Stage 1 in background
 	#daemon=True ensures this thread dies when the main thread dies
 	sniffer_thread = threading.Thread(target=start_ingestion, daemon=True)
 	sniffer_thread.start()
+
+	# Stage 9 — Performance Monitoring (parallel observer)
+	monitor_thread = threading.Thread(target=start_monitoring, daemon=True)
+	monitor_thread.start()
 	
 	start_processing()
