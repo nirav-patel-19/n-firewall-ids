@@ -6,24 +6,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container login-wrapper">
+    <div class="container login-wrapper" style="">
         <div class="card login-card">
-            <h2 style="color: var(--accent-blue); margin-bottom: 25px;">Admin Authentication</h2>
+            <h2 style="color: var(--accent-blue); margin-bottom: 25px; text-align:center;">Admin Authentication</h2>
             
             {% if error %}
             <p style="color: var(--accent-red); margin-bottom: 15px; text-align: center;">{{ error }}</p>
             {% endif %}
 
             <form method="POST" action="/login">
-                <div class="form-group">
-                    <label>Username</label>
+                <div class="form-group" style="text-align:center;">
+                    <label style="margin-right: 10px;">Username</label>
                     <input type="text" name="username" class="form-control" required>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
+                <div class="form-group" style="text-align:center;">
+                    <label style="margin-right: 14px;">Password</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-blue" style="width: 100%; margin-top: 10px;">Access Admin Panel</button>
+                <button type="submit" class="btn btn-blue" style="display: block; width: 30%; margin:10px auto; text-align:center;">Access Admin Panel</button>
             </form>
         </div>
     </div>

@@ -52,6 +52,7 @@ body {
     background:#111827;
     border-radius:8px;
     overflow:hidden;
+    margin: 50px 0;
 }
 
 table { width:100%; border-collapse:collapse; }
@@ -66,10 +67,13 @@ tr:hover { background:#1f2937; }
 .text-green { color:#10b981; }
 
 .btn {
-    padding:10px 15px;
-    background:#2563eb;
-    color:white;
-    border-radius:6px;
-    text-decoration:none;
+  padding: 10px 15px;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  align-content: center;
+  height: 40px;
+  align-self: center;
 }
 

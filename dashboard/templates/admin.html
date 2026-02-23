@@ -9,7 +9,7 @@
     <div class="container">
         <div class="header">
             <h1 style="color: var(--accent-red);">Admin Control Panel</h1>
-            <div>
+            <div style="align-content: center;">
                 <a href="/" style="color: white; margin-right: 20px; text-decoration: none;">&larr; Back to Dashboard</a>
                 <a href="/logout" class="btn btn-red">Logout</a>
             </div>
@@ -17,11 +17,11 @@
 
         <div class="grid" style="grid-template-columns: 1fr 2fr;">
             <div class="card" style="height: fit-content;">
-                <h2 style="color: white; text-align: left;">Manage IP Rules</h2>
-                <div class="form-group">
-                    <input type="text" id="ipInput" class="form-control" placeholder="Enter IP (e.g., 192.168.1.50)">
+                <h2 style="color: white; text-align: center;">Manage IP Rules</h2>
+                <div class="form-group" style="text-align: center;margin: 10px;">
+                    <input type="text" id="ipInput" class="form-control" placeholder="Enter IP (e.g., 192.168.1.50)" style="text-align: center;/*! align-items: center; */height: 40px;width: 70%;border-radius: 8px;">
                 </div>
-                <button onclick="modifyRule('add')" class="btn btn-red" style="width: 100%;">Block IP</button>
+                <button onclick="modifyRule('add')" class="btn btn-red" style="width: 68%;  display: block; margin:0 auto; text-align:center;">Block IP</button>
                 <p id="ruleMsg" style="margin-top: 15px; display: none;"></p>
             </div>
 
