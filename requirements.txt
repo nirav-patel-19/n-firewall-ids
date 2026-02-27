@@ -1,0 +1,8 @@
+# Network Packet Capture & Manipulation
+scapy>=2.5.0
+
+# Web Framework for SOC Dashboard
+Flask>=3.0.0
+
+# WSGI Server for production deployment (optional but recommended for Flask)
+gunicorn>=21.2.0
