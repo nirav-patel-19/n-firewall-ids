@@ -7,7 +7,7 @@ A fully functional research-grade Next-Generation Firewall and Intrusion Detecti
 
 ---
 
-## 1️1) Project Overview
+## 1) Project Overview
 
 ### The Problem
 Traditional firewalls rely heavily on static rule sets, rendering them blind to complex behavioral attacks and zero-day exploits. Modern networks require intelligent, adaptive defense mechanisms that can recognize malicious traffic patterns rather than just blocking isolated IP addresses.
@@ -22,7 +22,7 @@ Inspired by enterprise security processing models like pfSense and Snort, this p
 
 ---
 
-## 2️2) Pipeline Architecture
+## 2) Pipeline Architecture
 
 The system's modular design ensures that traffic is processed efficiently through distinct, specialized layers:
 
@@ -39,7 +39,7 @@ The system's modular design ensures that traffic is processed efficiently throug
 
 ---
 
-## 3️3) Installation Instructions
+## 3) Installation Instructions
 
 Get the project up and running on your local machine with the following commands:
 
