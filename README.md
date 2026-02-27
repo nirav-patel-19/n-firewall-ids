@@ -1,50 +1,231 @@
-# Next-Generation Firewall + IDS (NGFW)
+# Next-Generation Firewall + Intrusion Detection System (NGFW + IDS)
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
-[![Security](https://img.shields.io/badge/Security-NGFW%20%2B%20IDS-red.svg)]()
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
+![Security](https://img.shields.io/badge/Type-NGFW%20%2B%20IDS-red.svg)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)
 
-A fully functional research-grade Next-Generation Firewall and Intrusion Detection System built entirely from scratch in Python. This project bridges the gap between theoretical network security and enterprise-level execution by implementing a modular architecture designed to detect, log, and mitigate modern threats.
+A fully functional Next-Generation Firewall and Intrusion Detection System built from scratch in Python.
+
+This project demonstrates how modern enterprise firewalls operate internally by combining:
+
+- Static policy enforcement
+- Stateful behavioral detection
+- Correlation-based decision making
+- Automated mitigation
+- Real-time SOC dashboard visualization
+- Performance monitoring
+
+The system transforms raw network traffic into intelligent, adaptive defense decisions in real time.
 
 ---
 
-## 1) Project Overview
+## 📌 Project Overview
 
-### The Problem
-Traditional firewalls rely heavily on static rule sets, rendering them blind to complex behavioral attacks and zero-day exploits. Modern networks require intelligent, adaptive defense mechanisms that can recognize malicious traffic patterns rather than just blocking isolated IP addresses.
+### 🔍 The Problem
 
-### Why Firewall + IDS + ML?
-Security is most effective in layers. By fusing strict static policy enforcement with stateful behavioral analysis, this system achieves high-fidelity threat detection. Integrating Machine Learning (ML) capabilities in future iterations will transform the firewall from a reactive barrier into a predictive, self-learning defense system.
+Traditional firewalls rely primarily on static rule sets such as blocked IP addresses or restricted ports. While effective against known threats, they fail to detect behavioral attacks like:
 
-### Architecture Summary
-Inspired by enterprise security processing models like pfSense and Snort, this project utilizes a comprehensive 9-stage pipeline. It covers the entire packet lifecycle: from high-performance Scapy-based live capture to deep packet inspection, automated mitigation, and real-time visualization on a SOC dashboard.
+- Port scanning
+- SYN flood attacks
+- ICMP flooding
+- Malformed packet anomalies
+
+Modern networks require layered security mechanisms capable of analyzing traffic patterns over time.
+
+---
+
+### 🎯 The Solution
+
+This project implements a modular 9-stage security pipeline that performs:
+
+1. High-performance packet ingestion
+2. Packet normalization
+3. Static firewall policy enforcement
+4. Stateful IDS behavioral analysis
+5. Correlation-based decision making
+6. Automated IP blacklisting
+7. Multi-format forensic logging
+8. Real-time SOC dashboard visualization
+9. System performance monitoring
+
+---
+
+## 🏗 Architecture Overview
+
+The system follows a layered security architecture inspired by enterprise firewall models.
 
 ![NGFW Architecture Diagram](assets/ngfw.png)
 
----
+### Key Architectural Concepts
 
-## 2) Pipeline Architecture
-
-The system's modular design ensures that traffic is processed efficiently through distinct, specialized layers:
-
-* **Stage-1: Packet Ingestion**
-    Captures live network traffic using a Scapy-based sniffer. It utilizes a producer-consumer queue to maintain high performance and prevent packet loss during intense traffic spikes.
-* **Stage-2: Parsing**
-    Focuses on packet normalization. Raw binary data is converted into structured, analysis-ready formats by extracting critical metadata such as IP addresses, ports, protocols, and flags.
-* **Stage-3: Detection**
-    The core inspection layer splits into two engines. The **Firewall Rule Engine** enforces static, JSON-stored policies to block known bad entities. Simultaneously, the **IDS Engine** performs stateful behavioral analysis to detect complex threats like SYN floods, port scans, and ICMP floods.
-* **Stage-4: Response**
-    The Decision Engine (the correlation brain) evaluates the outputs from the firewall and IDS to escalate repeat offenders. It triggers an automated response, injecting dynamic rules to blacklist attackers in real-time while logging all forensics for the SOC Dashboard.
-* **Stage-5+: ML Integration (Future Scope)**
-    The architecture is designed to scale. Future modules will ingest normalized traffic data into Machine Learning models to shift from signature-based detection to predictive threat intelligence and expanded Extended Detection and Response (XDR) capabilities.
+- **Producer-Consumer Model** for stable packet ingestion
+- **Stateful Behavioral Detection**
+- **Correlation Engine** combining policy + behavior
+- **Dynamic Rule Injection**
+- **Multi-threaded processing**
+- **Real-time visualization**
 
 ---
 
-## 3) Installation Instructions
+## 🚀 Core Features
 
-Get the project up and running on your local machine with the following commands:
+### 🔹 Packet Capture
+- Live traffic capture using Scapy
+- Buffered queue for performance stability
+- Prevents packet loss during traffic spikes
 
+### 🔹 Packet Normalization
+- Extracts structured metadata:
+  - Source IP
+  - Destination IP
+  - Protocol
+  - Ports
+  - TCP flags
+- Converts raw packets into analysis-ready format
+
+### 🔹 Firewall Rule Engine
+- JSON-based static rule enforcement
+- Supports:
+  - Blocked IPs
+  - Blocked ports
+  - Blocked protocols
+- Atomic rule updates
+
+### 🔹 Intrusion Detection System (IDS)
+Stateful detection of:
+
+- SYN Flood attacks
+- Port scanning behavior
+- ICMP flooding
+- LAND attack (source = destination IP)
+
+Maintains per-source tracking for behavioral pattern analysis.
+
+### 🔹 Decision Engine (Correlation Layer)
+- Combines firewall and IDS outputs
+- Escalates repeated offenders
+- Triggers automatic blacklisting
+
+### 🔹 Automated Response
+- Dynamic IP blacklisting
+- Real-time mitigation
+- Persistent rule updates
+
+### 🔹 Logging & Forensics
+Events are stored in:
+
+- JSON (structured logs)
+- CSV (human-readable)
+- SQLite database (dashboard queries)
+
+### 🔹 SOC Dashboard
+Built using Flask + Chart.js
+
+Displays:
+- Allowed vs Blocked traffic
+- Protocol distribution
+- Recent security events
+- Admin rule management
+- System health metrics
+
+### 🔹 Performance Monitoring
+Tracks:
+- CPU usage
+- Memory utilization
+- Packet rate
+
+Ensures detection logic does not degrade system performance.
+
+---
+
+## 🧪 Demonstration Setup
+
+Tested using a two-machine lab setup:
+
+- Ubuntu → Firewall + IDS + Dashboard
+- Kali Linux → Attacker machine
+
+Simulated attacks:
+
+- `nmap -sS` (Port Scan)
+- `hping3 -S --flood` (SYN Flood)
+- `ping -f` (ICMP Flood)
+- LAND attack using spoofed source IP
+
+The system detects, logs, escalates, and blocks malicious traffic automatically.
+
+---
+
+## 📂 Project Structure
+
+```text
+capture/        → Packet ingestion & parsing
+core/           → Decision engine, logger, monitor
+ids/            → Behavioral detection engine
+rules/          → Firewall rule engine
+dashboard/      → Flask SOC dashboard
+logs/           → JSON & CSV logs
+storage/        → SQLite databases
+main.py         → System orchestrator
+```
+---
+
+## Installation
+
+### Clone the repository:
 ```bash
 git clone [https://github.com/yourusername/n-firewall-ids.git](https://github.com/yourusername/n-firewall-ids.git)
 cd n-firewall-ids
+```
+
+### Install dependencies:
+
+```bash
 pip install -r requirements.txt
-python main.py
+```
+
+### Run the system:
+
+```bash
+sudo python main.py
+```
+
+### Start the dashboard:
+
+```bash
+cd dashboard
+python app.py
+```
+
+### Access the dashboard at:
+
+```text
+http://localhost:5000
+```
+
+## Future Enhancements
+The architecture is designed to scale further with:
+- Machine Learning-based anomaly detection
+- Threat intelligence feed integration
+- Distributed sensor deployment
+- Extended Detection and Response (XDR) capabilities
+
+(Current implementation focuses on rule-based + behavioral detection.)
+
+## Learning Outcomes
+This project demonstrates:
+- Deep understanding of network packet flow
+- Stateful intrusion detection logic
+- Correlation-based threat classification
+- Multi-threaded system architecture
+- Real-time security monitoring design
+- Practical firewall automation
+
+## ⚠ Disclaimer
+This project is intended strictly for educational and laboratory use.
+Only test in controlled environments. Do not deploy in production networks without proper hardening and security review.
+
+📬 Contact
+If you have feedback or suggestions, feel free to open an issue or connect.
+
+⭐ If you found this project useful, consider giving it a star.
